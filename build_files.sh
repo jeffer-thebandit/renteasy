@@ -1,4 +1,5 @@
-# build_files.sh
+#!/bin/bash
+
 python3.9 -m pip install -r requirements.txt
 
 python3.9 manage.py makemigrations --noinput
