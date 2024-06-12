@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+#from decouple import config
 import os
-from decouple import config
 import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,10 +45,13 @@ INSTALLED_APPS = [
     'store.apps.StoreConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
+    'whitenoise.runserver_nostatic',
+    'storages',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,19 +84,21 @@ WSGI_APPLICATION = 'silk_road.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-'''
 
+
+
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'renteasy',
+        #'NAME': os.environ.get('NAME'),
         'USER': os.environ.get('USER'),
         'PASSWORD': os.environ.get('PASSWORD'),
         'PORT': 5432,
@@ -100,9 +106,17 @@ DATABASES = {
     }
 }
 
+
 DATABASES = {
     'default': dj_database_url.parse(config('DATABASE_URL')),
 }
+
+'''
+
+database_url = os.environ.get("DATABASE_URL")
+DATABASES["default"] = dj_database_url.parse(database_url)
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -150,12 +164,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = '/static/'
 
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-#vercel deployment settings
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+#vercel settings
+
 
 MEDIA_URL = '/images/'
 
@@ -168,3 +184,29 @@ LOGIN_REDIRECT_URL = 'store'
 LOGIN_URL = 'login'
 
 LOGOUT_REDIRECT_URL = 'store'
+
+AWS_QUERYSTRING_AUTH = False
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+AWS_LOCATION = 'static'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+
+
+#AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+
+
+#STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+#DEFAULT_FILE_STORAGE = 'silk_road.storage_backends.MediaStorage'
+#DEFAULT_FILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+#django_heroku.settings(locals())#, staticfiles=False)
