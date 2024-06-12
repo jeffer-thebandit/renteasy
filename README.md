@@ -33,7 +33,7 @@ Caching: Implemented caching using Django’s caching framework and Redis to sto
 Result
 The result was a highly optimized and secure database architecture that supported efficient data storage and retrieval. The performance improvements were evident, with search queries returning results quickly and write operations maintaining acceptable speeds.
 
-![Alt text](https://example.com/path/to/image.png)
+![Alt text](https://myawssilk.s3.eu-west-2.amazonaws.com/static/images/Screenshot+(65).png)
 
 
 ## Installation
